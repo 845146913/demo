@@ -7,8 +7,11 @@ import org.springframework.data.jpa.repository.support.JpaRepositoryImplementati
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
+import org.springframework.data.repository.query.QueryLookupStrategy;
+import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
 
 import javax.persistence.EntityManager;
+import java.util.Optional;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,6 +44,10 @@ public class GenericRepositoryFactoryBean<R extends JpaRepository<T, ID>, T, ID>
             return new GenericRepositoryImpl<>(information.getDomainType(), entityManager);
         }
 
+//        @Override
+//        protected Optional<QueryLookupStrategy> getQueryLookupStrategy(QueryLookupStrategy.Key key, QueryMethodEvaluationContextProvider evaluationContextProvider) {
+//            return Optional.of(CustomQueryLookupStrategy.create(entityManager, key, evaluationContextProvider));
+//        }
 
         @Override
         protected Class<?> getRepositoryBaseClass(RepositoryMetadata metadata) {
