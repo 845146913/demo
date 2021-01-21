@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @SpringBootApplication
 //@EnableParamEnumConfig
 @RestController
-@EnableJpaRepositories(repositoryFactoryBeanClass = GenericRepositoryFactoryBean.class,
-    basePackages = {"com.example.demo.repository", "com.example.demo.entity"})
+@EnableJpaRepositories(repositoryFactoryBeanClass = GenericRepositoryFactoryBean.class)
 public class DemoApplication {
 
     @PostMapping("/test")

@@ -10,8 +10,8 @@ import javax.persistence.EntityManager;
  * author: wangshuiping
  * date: 2021/1/20
  */
-@NoRepositoryBean
 public class GenericRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID> implements GenericRepository<T, ID> {
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public GenericRepositoryImpl(Class<T> domainClass, EntityManager em) {
         super(domainClass, em);
     }
