@@ -4,6 +4,7 @@ import com.example.demo.dto.SysUserDTO;
 import com.example.demo.entity.SysRole;
 import com.example.demo.entity.SysUser;
 import com.example.demo.repository.SysUserRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,8 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -47,8 +50,8 @@ public class UserController {
     }
 
     @GetMapping("/t")
-    public List<SysUser> listDto() {
-
-        return sysUserRepository.findDTO();
+    public List<SysUserDTO> listDto() {
+        List<SysUserDTO> list = sysUserRepository.findDTO();
+        return list;
     }
 }

@@ -2,6 +2,7 @@ package com.example.demo.core;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.core.RepositoryInformation;
 
@@ -43,7 +44,13 @@ public class JpqlResultMethodInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-        Object obj = methodInvocation.proceed();
-        return obj;
+        Method method = methodInvocation.getMethod();
+        NativeQuery annotation = AnnotationUtils.findAnnotation(method, NativeQuery.class);
+        if(annotation != null) {
+            return null;
+        } else {
+            Object obj = methodInvocation.proceed();
+            return obj;
+        }
     }
 }
