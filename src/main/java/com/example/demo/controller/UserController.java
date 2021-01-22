@@ -50,4 +50,10 @@ public class UserController {
         List<SysUserDTO> list = sysUserRepository.findDTO();
         return list;
     }
+
+    @GetMapping("/native")
+    public List<SysUserDTO> nativeList(){
+
+        return sysUserRepository.findAllDTO();
+    }
 }

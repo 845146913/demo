@@ -46,6 +46,7 @@ public class GenericRepositoryFactoryBean<R extends JpaRepository<T, ID>, T, ID>
 
         @Override
         protected Optional<QueryLookupStrategy> getQueryLookupStrategy(QueryLookupStrategy.Key key, QueryMethodEvaluationContextProvider evaluationContextProvider) {
+
             return Optional.of(CustomQueryLookupStrategy.create(entityManager, key, evaluationContextProvider));
         }
 
