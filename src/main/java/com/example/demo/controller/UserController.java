@@ -50,6 +50,12 @@ public class UserController {
         return list;
     }
 
+    @GetMapping("/t1")
+    public List<SysUser> listDto1() {
+        List<SysUser> list = sysUserRepository.findAllUser();
+        return list;
+    }
+
     @GetMapping("/native")
     public List<SysUserDTO> nativeList(){
 

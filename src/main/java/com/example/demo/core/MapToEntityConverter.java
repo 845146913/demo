@@ -1,14 +1,21 @@
 package com.example.demo.core;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.util.ReflectionUtils;
 
+import javax.persistence.AttributeConverter;
+import javax.persistence.Convert;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -36,13 +43,20 @@ public class MapToEntityConverter implements GenericConverter {
                 String key = entry.getKey();
                 String methodName = getMethodName(key);
                 Method[] methods = ReflectionUtils.getDeclaredMethods(targetType.getType());
-                Method method = Stream.of(methods).filter(me -> me.getName().equalsIgnoreCase(methodName))
-                        .findFirst().orElse(null);
+                Method method = Objects.requireNonNull(Stream.of(methods).filter(me -> me.getName().equalsIgnoreCase(methodName))
+                        .findFirst().orElse(null));
                 try {
-                    Objects.requireNonNull(method).invoke(target, caseValue(entry.getValue()));
+                    Convert convertAnno = AnnotationUtils.findAnnotation(method, Convert.class);
+                    AttributeConverter converter = null;
+                    if(convertAnno != null) {
+                        converter = (AttributeConverter) convertAnno.converter().newInstance();
+                    }
+                    method.invoke(target, caseValue(entry.getValue(), method.getParameterTypes()[0], converter));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                } catch (InstantiationException e) {
                     e.printStackTrace();
                 }
             });
@@ -58,7 +72,7 @@ public class MapToEntityConverter implements GenericConverter {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
-        return new HashMap<>();
+        return source;
     }
 
     private String getMethodName(String field) {
@@ -70,11 +84,32 @@ public class MapToEntityConverter implements GenericConverter {
         return "set" + translateUpperCamelCase(field);
     }
 
-    public Object caseValue(Object value) {
-        if (value instanceof java.math.BigInteger) {
-            return ((BigInteger) value).longValue();
+    public Object caseValue(Object o, Class<?> type, AttributeConverter converter) {
+        if (o.getClass() == type)
+            return o;
+
+        if (o instanceof java.math.BigInteger) {
+            if (Long.class == type)
+                return ((BigInteger) o).longValue();
+            if (Integer.class == type)
+                return ((BigInteger) o).intValue();
+            if (Byte.class == type) {
+                return ((BigInteger) o).byteValue();
+            }
         }
-        return value;
+        if (o instanceof java.math.BigDecimal) {
+            if (type == Double.class)
+                return ((BigDecimal) o).doubleValue();
+            if (type == Float.class)
+                return ((BigDecimal) o).floatValue();
+        }
+        if (type.isEnum()) {
+            if(converter == null)
+                return Enum.valueOf((Class<Enum>) type, String.valueOf(o));
+            else
+                return converter.convertToEntityAttribute(o);
+        }
+        return o;
     }
 
     public String translateUpperCamelCase(String input) {
