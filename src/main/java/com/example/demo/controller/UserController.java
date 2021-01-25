@@ -4,9 +4,7 @@ import com.example.demo.dto.SysUserDTO;
 import com.example.demo.entity.SysRole;
 import com.example.demo.entity.SysUser;
 import com.example.demo.repository.SysUserRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -68,5 +66,10 @@ public class UserController {
     public Map<String, Object> nativeList2(){
 
         return sysUserRepository.findMap();
+    }
+
+    @PostMapping("/rb")
+    public Object requestBodyTest(@RequestBody Map<String, Object> param) {
+        return param;
     }
 }
