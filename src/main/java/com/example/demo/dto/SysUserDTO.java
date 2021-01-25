@@ -15,6 +15,7 @@ public class SysUserDTO {
     private Long id;
     private String name;
 
+    @Convert(converter = TypeEnum.TypeEnumConverter.class)
     private TypeEnum type;
 
 
@@ -48,7 +49,6 @@ public class SysUserDTO {
         return type;
     }
 
-    @Convert(converter = TypeEnum.TypeEnumConverter.class)
     public void setType(TypeEnum type) {
         this.type = type;
     }

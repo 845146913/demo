@@ -51,14 +51,7 @@ public class MapToEntityConverter implements GenericConverter {
                 Method method = Objects.requireNonNull(Stream.of(methods).filter(me -> me.getName().equalsIgnoreCase(methodName))
                         .findFirst().orElse(null));
                 try {
-                    Convert ca = AnnotationUtils.findAnnotation(method, Convert.class);
-                    Field field = ReflectionUtils.findField(clazz, method.getName().substring(method.getName().indexOf("set") + 1));
-
-                    AttributeConverter<?,?> converter = null;
-                    if(ca != null) {
-                        if(ca.converter() != void.class)
-                            converter = (AttributeConverter<?,?>) ca.converter().newInstance();
-                    }
+                    AttributeConverter<?, ?> converter = getAttributeConverter(clazz, method);
                     method.invoke(target, caseValue(entry.getValue(), method.getParameterTypes()[0], converter));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
@@ -83,6 +76,25 @@ public class MapToEntityConverter implements GenericConverter {
         return source;
     }
 
+    private AttributeConverter<?, ?> getAttributeConverter(Class<?> clazz, Method method) throws InstantiationException, IllegalAccessException {
+        Convert ca = AnnotationUtils.findAnnotation(method, Convert.class);
+        if (ca == null) {
+            Field field = ReflectionUtils.findField(clazz, getFieldName(method));
+            ca = field.getAnnotation(Convert.class);
+        }
+        AttributeConverter<?, ?> converter = null;
+        if (ca != null) {
+            if (ca.converter() != void.class)
+                converter = (AttributeConverter<?, ?>) ca.converter().newInstance();
+        }
+        return converter;
+    }
+
+    private String getFieldName(Method method) {
+        String fieldName = method.getName().substring(method.getName().indexOf("set") + 3);
+        return fieldName.substring(0, 1).toLowerCase() + fieldName.substring(1);
+    }
+
     private String getFieldName(String field) {
         String[] split = field.split("_");
         if (split.length > 0) {
@@ -91,7 +103,8 @@ public class MapToEntityConverter implements GenericConverter {
         }
         return translateUpperCamelCase(field);
     }
-    private String getMethodName(String field){
+
+    private String getMethodName(String field) {
         return "set" + getFieldName(field);
     }
 
@@ -116,7 +129,7 @@ public class MapToEntityConverter implements GenericConverter {
                 return ((BigDecimal) o).floatValue();
         }
         if (type.isEnum()) {
-            if(converter == null)
+            if (converter == null)
                 return Enum.valueOf((Class<Enum>) type, String.valueOf(o));
             else
                 return converter.convertToEntityAttribute(o);
