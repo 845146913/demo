@@ -27,4 +27,10 @@ public interface SysUserRepository extends GenericRepository<SysUser, Long> {
 
     @Query(value = "select u.id as id, u.name as name from sys_user u", nativeQuery = true)
     List<SysUserDTO> findAllDTO();
+
+    @Query(value = "select u.id as id, u.name as name from sys_user u", nativeQuery = true)
+    List<Map<String, Object>> findList();
+
+    @Query(value = "select u.id as id, u.name as name from sys_user u limit 1", nativeQuery = true)
+    Map<String, Object> findMap();
 }

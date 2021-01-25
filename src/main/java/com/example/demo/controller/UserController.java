@@ -12,6 +12,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -55,5 +56,17 @@ public class UserController {
     public List<SysUserDTO> nativeList(){
 
         return sysUserRepository.findAllDTO();
+    }
+
+    @GetMapping("/native1")
+    public List<Map<String, Object>> nativeList1(){
+
+        return sysUserRepository.findList();
+    }
+
+    @GetMapping("/native2")
+    public Map<String, Object> nativeList2(){
+
+        return sysUserRepository.findMap();
     }
 }

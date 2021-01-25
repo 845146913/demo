@@ -1,16 +1,17 @@
 package com.example.demo.dto;
 
-import com.example.demo.core.Convertable;
-
 /**
  * Created by IntelliJ IDEA.
  * author: wangshuiping
  * date: 2021/1/20
  */
-public class SysUserDTO implements Convertable {
+public class SysUserDTO {
 
     private Long id;
     private String name;
+
+    public SysUserDTO() {
+    }
 
     public SysUserDTO(Long id, String name) {
         this.id = id;

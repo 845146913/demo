@@ -16,7 +16,7 @@ import java.util.*;
 public class MapToEntityConverter implements GenericConverter {
     @Override
     public Set<ConvertiblePair> getConvertibleTypes() {
-        ConvertiblePair pair = new ConvertiblePair(Map.class, Convertable.class);
+        ConvertiblePair pair = new ConvertiblePair(Map.class, Object.class);
         return Collections.singleton(pair);
     }
 
@@ -27,9 +27,10 @@ public class MapToEntityConverter implements GenericConverter {
         System.out.println("targetType:" + targetType);
         try {
             Class<?> clazz = Class.forName(targetType.getName());
-            Constructor<?>[] declaredConstructors = clazz.getDeclaredConstructors();
-            // todo
-            Object target = declaredConstructors[0].newInstance(1,"1");
+            Constructor<?> constructor = clazz.getDeclaredConstructor();
+            // 设置私有构造访问权限
+            constructor.setAccessible(true);
+            Object target = constructor.newInstance();
             BeanUtils.copyProperties(source, target);
             return target;
         } catch (InstantiationException e) {
@@ -39,6 +40,8 @@ public class MapToEntityConverter implements GenericConverter {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
         return new HashMap<>();

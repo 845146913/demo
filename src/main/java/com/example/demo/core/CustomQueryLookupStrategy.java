@@ -21,6 +21,7 @@ import javax.persistence.EntityManager;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Map;
 
 public class CustomQueryLookupStrategy implements QueryLookupStrategy {
     private final EntityManager em;
@@ -49,7 +50,7 @@ public class CustomQueryLookupStrategy implements QueryLookupStrategy {
     public RepositoryQuery resolveQuery(Method method, RepositoryMetadata repositoryMetadata, ProjectionFactory projectionFactory, NamedQueries namedQueries) {
         Query query = method.getAnnotation(Query.class);
         if (query != null) {
-            if (isConvertable(method, repositoryMetadata)) {
+            if (needConvert(method, repositoryMetadata)) {
                 DefaultConversionService sharedInstance = (DefaultConversionService) DefaultConversionService.getSharedInstance();
                 sharedInstance.addConverter(new MapToEntityConverter());
             }
@@ -57,30 +58,31 @@ public class CustomQueryLookupStrategy implements QueryLookupStrategy {
         return queryLookupStrategy.resolveQuery(method, repositoryMetadata, projectionFactory, namedQueries);
     }
 
-    private boolean isConvertable(Method method, RepositoryMetadata repositoryMetadata) {
+    private boolean needConvert(Method method, RepositoryMetadata repositoryMetadata) {
         Class<?> returnType = method.getReturnType();
         Class<?> domainType = repositoryMetadata.getDomainType();
         if (Iterable.class.isAssignableFrom(returnType)) {
             Type grt = method.getGenericReturnType();
             if (grt instanceof ParameterizedType) {
                 ParameterizedType pt = (ParameterizedType) grt;
-                Class<?> argument = (Class<?>) pt.getActualTypeArguments()[0];
-                if (!domainType.isAssignableFrom(argument)) {
-                    boolean assignableFrom = Convertable.class.isAssignableFrom(argument);
-                    Assert.state(assignableFrom, String.format("method returnType's argument must implements Convertable interface! %s %s.%s",
-                            method.getGenericReturnType(), method.getDeclaringClass().getSimpleName(), method.getName()));
-                    return true;
+                Type ata = pt.getActualTypeArguments()[0];
+                if(!(ata instanceof ParameterizedType)) {
+                    Class<?> argument = (Class<?>) ata;
+                    if (!domainType.isAssignableFrom(argument)) {
+                        boolean assignableFrom = Map.class.isAssignableFrom(argument);
+                        if(!assignableFrom){
+                            return true;
+                        }
+                    }
                 }
             }
         } else {
             boolean isExtendDomainType = domainType.isAssignableFrom(returnType);
-            boolean is = Convertable.class.isAssignableFrom(returnType);
             if (!isExtendDomainType) {
-                Assert.state(is, String.format("method returnType must implements Convertable interface! %s %s.%s",
-                        method.getGenericReturnType(), method.getDeclaringClass().getSimpleName(), method.getName()));
                 return true;
             }
         }
         return false;
     }
+
 }
