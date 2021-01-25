@@ -8,6 +8,7 @@ import org.springframework.util.ReflectionUtils;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Convert;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
@@ -24,6 +26,9 @@ import java.util.stream.Stream;
  * date: 2021/1/22
  */
 public class MapToEntityConverter implements GenericConverter {
+
+    private final static Map<Class<?>, Object> converterCache = new ConcurrentHashMap<>(256);
+
     @Override
     public Set<ConvertiblePair> getConvertibleTypes() {
         ConvertiblePair pair = new ConvertiblePair(Map.class, Object.class);
@@ -46,10 +51,13 @@ public class MapToEntityConverter implements GenericConverter {
                 Method method = Objects.requireNonNull(Stream.of(methods).filter(me -> me.getName().equalsIgnoreCase(methodName))
                         .findFirst().orElse(null));
                 try {
-                    Convert convertAnno = AnnotationUtils.findAnnotation(method, Convert.class);
-                    AttributeConverter converter = null;
-                    if(convertAnno != null) {
-                        converter = (AttributeConverter) convertAnno.converter().newInstance();
+                    Convert ca = AnnotationUtils.findAnnotation(method, Convert.class);
+                    Field field = ReflectionUtils.findField(clazz, method.getName().substring(method.getName().indexOf("set") + 1));
+
+                    AttributeConverter<?,?> converter = null;
+                    if(ca != null) {
+                        if(ca.converter() != void.class)
+                            converter = (AttributeConverter<?,?>) ca.converter().newInstance();
                     }
                     method.invoke(target, caseValue(entry.getValue(), method.getParameterTypes()[0], converter));
                 } catch (IllegalAccessException e) {
@@ -75,15 +83,19 @@ public class MapToEntityConverter implements GenericConverter {
         return source;
     }
 
-    private String getMethodName(String field) {
+    private String getFieldName(String field) {
         String[] split = field.split("_");
         if (split.length > 0) {
             String property = Stream.of(split).reduce((a, b) -> translateUpperCamelCase(a) + translateUpperCamelCase(b)).get();
-            return "set" + property;
+            return property;
         }
-        return "set" + translateUpperCamelCase(field);
+        return translateUpperCamelCase(field);
+    }
+    private String getMethodName(String field){
+        return "set" + getFieldName(field);
     }
 
+    @SuppressWarnings({"unchecked", "raws"})
     public Object caseValue(Object o, Class<?> type, AttributeConverter converter) {
         if (o.getClass() == type)
             return o;
