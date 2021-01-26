@@ -27,7 +27,7 @@ public class UserController {
     private SysRoleRepository sysRoleRepository;
 
     @GetMapping("/init")
-    public void init() {
+    public String init() {
         List<SysUser> users = new ArrayList<>();
         for(int i=0; i<10; i++) {
             SysUser u = new SysUser();
@@ -39,6 +39,7 @@ public class UserController {
             users.add(u);
         }
         sysUserRepository.saveAll(users);
+        return "ok";
     }
 
     @GetMapping
