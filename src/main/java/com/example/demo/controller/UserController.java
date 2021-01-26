@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.SysUserDTO;
 import com.example.demo.entity.SysRole;
 import com.example.demo.entity.SysUser;
+import com.example.demo.repository.SysRoleRepository;
 import com.example.demo.repository.SysUserRepository;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,8 @@ import java.util.Map;
 public class UserController {
     @Resource
     private SysUserRepository sysUserRepository;
+    @Resource
+    private SysRoleRepository sysRoleRepository;
 
     @GetMapping("/init")
     public void init() {
@@ -70,12 +73,15 @@ public class UserController {
 
     @GetMapping("/native2")
     public Map<String, Object> nativeList2(){
-
+        List<SysRole> all = sysRoleRepository.findAll();
+        System.out.println(all);
         return sysUserRepository.findMap();
     }
 
     @PostMapping("/rb")
     public Object requestBodyTest(@RequestBody Map<String, Object> param) {
+        List<SysRole> all = sysRoleRepository.findAll();
+        System.out.println(all);
         return param;
     }
 }
