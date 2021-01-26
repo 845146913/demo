@@ -45,23 +45,17 @@ public class MapToEntityConverter implements GenericConverter {
             // 设置私有构造访问权限
             constructor.setAccessible(true);
             Object target = constructor.newInstance();
-            sourceMap.entrySet().forEach(entry -> {
+            for (Map.Entry<String, Object> entry : sourceMap.entrySet()) {
                 String key = entry.getKey();
+                Object value = entry.getValue();
                 String methodName = getMethodName(key);
                 Method[] methods = ReflectionUtils.getDeclaredMethods(targetType.getType());
                 Method method = Objects.requireNonNull(Stream.of(methods).filter(me -> me.getName().equalsIgnoreCase(methodName))
                         .findFirst().orElse(null));
-                try {
-                    AttributeConverter<?, ?> converter = getAttributeConverter(clazz, method);
-                    method.invoke(target, caseValue(entry.getValue(), method.getParameterTypes()[0], converter));
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                }
-            });
+                AttributeConverter<?, ?> converter = getAttributeConverter(clazz, method);
+                Object valueToUse = caseValue(value, method.getParameterTypes()[0], converter);
+                method.invoke(target, valueToUse);
+            }
             return target;
         } catch (InstantiationException e) {
             e.printStackTrace();
@@ -85,8 +79,14 @@ public class MapToEntityConverter implements GenericConverter {
         }
         AttributeConverter<?, ?> converter = null;
         if (ca != null) {
-            if (ca.converter() != void.class)
-                converter = (AttributeConverter<?, ?>) ca.converter().newInstance();
+            if (ca.converter() != void.class) {
+                Object o = converterCache.get(ca.converter());
+                if (Objects.nonNull(o)) {
+                    converter = (AttributeConverter<?, ?>) o;
+                } else {
+                    converter = (AttributeConverter<?, ?>) ca.converter().newInstance();
+                }
+            }
         }
         return converter;
     }
