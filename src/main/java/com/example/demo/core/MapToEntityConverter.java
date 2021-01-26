@@ -36,6 +36,7 @@ public class MapToEntityConverter implements GenericConverter {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "raws"})
     public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
         try {
             Map<String, Object> sourceMap = (Map<String, Object>) source;
