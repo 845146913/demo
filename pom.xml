@@ -42,8 +42,8 @@
         <!-- 自定义的枚举插件-->
         <dependency>
             <groupId>com.silencew.plugins</groupId>
-            <artifactId>silencew-enums-spring-boot-autoconfiguer</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>silencew-enums-spring-boot-starter</artifactId>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
 

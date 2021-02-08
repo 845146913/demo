@@ -15,7 +15,7 @@ public class DemoApplication {
 
     @PostMapping("/test")
     public String test(@RequestBody Demo param) {
-        return "ok" + param.getGender();
+        return "ok" + param.toString();
     }
     @GetMapping("/pt/{gender}")
     public String tset(@PathVariable Demo.Gender gender){

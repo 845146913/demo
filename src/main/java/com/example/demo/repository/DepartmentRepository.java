@@ -1,0 +1,16 @@
+package com.example.demo.repository;
+
+import com.example.demo.dto.SysUserDTO;
+import com.example.demo.entity.Department;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+public interface DepartmentRepository extends JpaRepository<Department, Long>, JpaSpecificationExecutor<Department> {
+
+    @Query("from Department d")
+    List<SysUserDTO> findDTO(Specification<Department> spec);
+}
