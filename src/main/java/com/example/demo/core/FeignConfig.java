@@ -39,10 +39,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Configuration
 public class FeignConfig {
@@ -66,6 +63,9 @@ public class FeignConfig {
             Method method = response.request().requestTemplate().methodMetadata().method();
             ResponseEntity ann = AnnotationUtils.findAnnotation(method, ResponseEntity.class);
             if (ann != null) {
+                if (response.status() == 404 || response.status() == 204) {
+                    return null;
+                }
                 String dc = response.body().toString();
                 try {
                     JavaType javaType = TypeFactory.defaultInstance().constructType(type);
