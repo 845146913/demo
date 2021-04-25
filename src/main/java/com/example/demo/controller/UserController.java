@@ -3,6 +3,9 @@ package com.example.demo.controller;
 import com.example.demo.dto.SysUserDTO;
 import com.example.demo.entity.SysRole;
 import com.example.demo.entity.SysUser;
+import com.example.demo.feign.HuyaFeign;
+import com.example.demo.feign.SearchReq;
+import com.example.demo.feign.TestFeign;
 import com.example.demo.repository.SysRoleRepository;
 import com.example.demo.repository.SysUserRepository;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +28,36 @@ public class UserController {
     private SysUserRepository sysUserRepository;
     @Resource
     private SysRoleRepository sysRoleRepository;
+    @Resource
+    TestFeign testFeign;
+    @Resource
+    HuyaFeign huyaFeign;
+
+    @GetMapping("/s")
+    public Object s() {
+        SearchReq req = new SearchReq();
+        req.setWd("test");
+        String s = testFeign.s(req);
+        System.out.println("baidu search:"+s);
+        //return testFeign.s("sb");
+        //return testFeign.r("/vip/realLevelRoles");
+        return testFeign.r("vip/realLevelRoles");
+    }
+
+    @GetMapping("/s1")
+    public Object s1() {
+        return testFeign.getJson();
+    }
+
+    @GetMapping("/hsk")
+    public Object hsk() {
+        SearchReq req = new SearchReq();
+        req.setWd("test");
+        //return testFeign.s(req);
+        //return testFeign.s("sb");
+        //return testFeign.r("/vip/realLevelRoles");
+        return huyaFeign.s("vip/realLevelRoles");
+    }
 
     @GetMapping("/init")
     public String init() {

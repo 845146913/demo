@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 引入默认设置 -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- 编码格式设置 -->
+    <property name="ENCODING" value="UTF-8" />
+    <!-- 日志文件的存储地址，由application.yml中的logging.path配置，根路径默认同项目路径 -->
+    <property name="LOG_HOME" value="${LOG_PATH:-.}" />
+    <!-- 常规输出格式：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符 -->
+    <property name="NORMAL_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}.%method@%line - %msg%n"/>
+    <!-- 彩色输出格式：magenta：洋红，boldMagenta：粗红，cyan：青色 -->
+    <property name="CONSOLE_LOG_PATTERN" value="%boldMagenta([%d{yyyy-MM-dd HH:mm:ss.SSS}]) %red([%thread]) %boldMagenta(%-5level) %blue(%logger{66}.%method（）@%line) %magenta(·═>) %cyan(%msg%n)"/>
+
+    <!-- ==========================控制台输出设置========================== -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${NORMAL_LOG_PATTERN}</pattern>
+            <charset>${ENCODING}</charset>
+        </encoder>
+    </appender>
+    <springProfile name="dev">
+        <root level="info">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+</configuration>
