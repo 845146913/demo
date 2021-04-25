@@ -95,11 +95,18 @@ public class FeignConfig {
                 Method method = template.methodMetadata().method();
                 HandlerMethod hm = new HandlerMethod(object, method);
                 MethodParameter[] methodParameters = hm.getMethodParameters();
-                boolean anyMatch = Arrays.asList(methodParameters).stream().anyMatch(methodParameter -> methodParameter.hasParameterAnnotation(RequestBody.class));
+                boolean anyMatch = Arrays.asList(methodParameters)
+                        .stream()
+                        .anyMatch(methodParameter ->
+                    methodParameter.hasParameterAnnotation(RequestBody.class) && bodyType.equals(methodParameter.getParameterType())
+                );
                 if(anyMatch) {
-                    templateWrapper(object, template);
-                }
 
+                    templateWrapper(object, template);
+                    return;
+                }
+                delegate.encode(object, bodyType, template);
+                return;
 //                Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 //                if (parameterAnnotations != null) {
 //                    boolean anyMatch = isAnyMatch(parameterAnnotations, RequestBody.class);
@@ -107,12 +114,19 @@ public class FeignConfig {
 //                        templateWrapper(object, template);
 //                    }
 //                }
-            } else {
-                delegate.encode(object, bodyType, template);
             }
+            delegate.encode(object, bodyType, template);
         }
 
         private void templateWrapper(Object object, RequestTemplate template) {
+            if (object instanceof Map) {
+                ((Map)object).forEach((k,v) -> {
+                    if(Objects.nonNull(v)) {
+                        template.query(k.toString(), v.toString());
+                    }
+                });
+                return;
+            }
             Map<String, Object> map =new HashMap<>();
             Class<?> aClass = object.getClass();
             JsonNaming jsonNaming = AnnotationUtils.findAnnotation(aClass, JsonNaming.class);
